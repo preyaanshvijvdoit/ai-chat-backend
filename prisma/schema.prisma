@@ -1,0 +1,171 @@
+// ===============================
+// Prisma Client Generator
+// ===============================
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+// ===============================
+// Database Connection
+// ===============================
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===============================
+// ENUMS
+// ===============================
+
+// Every user currently has only one role.
+// More roles (ADMIN, MODERATOR, etc.) can be added later.
+enum UserRole {
+  USER
+}
+
+// Indicates who sent a message.
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ===============================
+// USER MODEL
+// ===============================
+
+model User {
+  // Primary Key (UUID)
+  id String @id @default(uuid())
+
+  // User's full name
+  name String
+
+  // Login email
+  email String @unique
+
+  // Hashed password
+  password String
+
+  // User role
+  role UserRole @default(USER)
+
+  // Email verification
+  isVerified Boolean @default(false)
+
+  // Relationships
+  chats         Chat[]
+  refreshTokens RefreshToken[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Soft Delete
+  deletedAt              DateTime?
+  emailVerificationToken EmailVerificationToken?
+}
+
+// ===============================
+// CHAT MODEL
+// ===============================
+
+model Chat {
+  // Primary Key
+  id String @id @default(uuid())
+
+  // Chat title
+  title String @default("New Chat")
+
+  // Foreign Key
+  userId String
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  // One chat contains many messages
+  messages Message[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Soft Delete
+  deletedAt DateTime?
+
+  // Index for faster searching
+  @@index([userId])
+}
+
+// ===============================
+// MESSAGE MODEL
+// ===============================
+
+model Message {
+  // Primary Key
+  id String @id @default(uuid())
+
+  // Foreign Key
+  chatId String
+
+  // Relationship
+  chat Chat @relation(fields: [chatId], references: [id])
+
+  // Who sent the message?
+  role MessageRole
+
+  // Actual message
+  content String
+
+  // Timestamp
+  createdAt DateTime @default(now())
+
+  // Index
+  @@index([chatId])
+}
+
+// ===============================
+// REFRESH TOKEN MODEL
+// ===============================
+
+model RefreshToken {
+  // Primary Key
+  id String @id @default(uuid())
+
+  // JWT Refresh Token
+  token String @unique
+
+  // Expiry Time
+  expiresAt DateTime
+
+  // Foreign Key
+  userId String
+
+  // Relationship
+  user User @relation(fields: [userId], references: [id])
+
+  // Timestamp
+  createdAt DateTime @default(now())
+
+  // Index
+  @@index([userId])
+}
+
+// ===============================
+// EMAIL VERIFICATION TOKEN MODEL
+// ===============================
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@index([userId])
+}
