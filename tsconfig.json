@@ -1,27 +1,24 @@
 {
   "compilerOptions": {
-    /* Language */
     "target": "ES2022",
     "module": "CommonJS",
 
-    /* Project */
     "rootDir": "./src",
     "outDir": "./dist",
 
-    /* Type Checking */
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
 
-    /* Module Support */
     "esModuleInterop": true,
     "resolveJsonModule": true,
 
-    /* Quality */
+    "types": ["node"],
+    "lib": ["ES2022"],
+
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
-    /* Debugging */
     "sourceMap": true
   },
   "include": ["src"],
