@@ -33,10 +33,35 @@ export const authService = {
     const existingUser = await authRepository.findByEmail(data.email);
 
     if (existingUser) {
-      throw new AppError(
-        HTTP_STATUS.CONFLICT,
-        "Email is already registered."
-      );
+      // Verified users permanently own their email.
+      if (existingUser.isVerified) {
+        throw new AppError(
+          HTTP_STATUS.CONFLICT,
+          "Email is already registered."
+        );
+      }
+
+      // Find the verification token.
+      const verificationToken =
+        await emailVerificationRepository.findByUserId(
+          existingUser.id
+        );
+
+      // If the token exists and is still valid,
+      // ask the user to verify first.
+      if (
+        verificationToken &&
+        verificationToken.expiresAt > new Date()
+      ) {
+        throw new AppError(
+          HTTP_STATUS.CONFLICT,
+          "Please verify your email before registering again."
+        );
+      }
+
+      // Verification expired.
+      // Delete the old unverified account.
+      await authRepository.deleteUser(existingUser.id);
     }
 
     // Hash the user's password.

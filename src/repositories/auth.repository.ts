@@ -25,4 +25,15 @@ export const authRepository = {
       data,
     });
   },
+
+  /**
+   * Delete a user by ID.
+   */
+  async deleteUser(userId: string) {
+    return prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+  },
 };
