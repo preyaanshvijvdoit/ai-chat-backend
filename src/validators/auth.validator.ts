@@ -34,9 +34,7 @@ export const loginUserSchema = z.object({
     .trim()
     .toLowerCase(),
 
-  password: z
-    .string()
-    .min(1, "Password is required."),
+  password: z.string().min(8).max(128)
 });
 
 export const verifyEmailSchema = z.object({
