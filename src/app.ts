@@ -7,6 +7,7 @@ import { notFoundMiddleware } from "./middlewares/not-found.middleware";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import routes from "./routes";
 import cookieParser from "cookie-parser";
+import { env } from "./config/env";
 
 const app = express();
 
@@ -18,8 +19,13 @@ app.use(helmet());
 /**
  * Enable Cross-Origin Resource Sharing.
  */
-app.use(cors());
 
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+  })
+);
 /**
  * Compress HTTP responses.
  */
