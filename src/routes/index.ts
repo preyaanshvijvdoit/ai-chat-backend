@@ -1,7 +1,8 @@
 import { Router } from "express";
 
-import healthRoutes from "./health.routes";
 import authRoutes from "./auth.routes";
+import chatRoutes from "./chat.routes";
+import healthRoutes from "./health.routes";
 import userRoutes from "./user.routes";
 
 const router = Router();
@@ -12,5 +13,6 @@ const router = Router();
 router.use("/health", healthRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
+router.use("/chat", chatRoutes);
 
 export default router;
