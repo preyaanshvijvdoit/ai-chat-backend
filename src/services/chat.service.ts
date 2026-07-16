@@ -1,11 +1,10 @@
-import { HTTP_STATUS } from "../constants/http-status";
+import { getAuthorizedChat } from "../helpers/chat.helper";
 import {
   ChatResponseDto,
   CreateChatDto,
   RenameChatDto,
 } from "../interfaces/chat.interface";
 import { chatRepository } from "../repositories/chat.repository";
-import { AppError } from "../utils/app-error";
 
 /**
  * Converts a database Chat object into the DTO
@@ -25,30 +24,6 @@ const toChatResponseDto = (
   updatedAt: chat.updatedAt,
 });
 
-/**
- * Returns a chat only if it belongs to the user.
- *
- * Throws a 404 error if the chat does not exist,
- * belongs to another user, or has been deleted.
- */
-const getAuthorizedChat = async (
-  chatId: string,
-  userId: string
-) => {
-  const chat = await chatRepository.findByIdAndUserId(
-    chatId,
-    userId
-  );
-
-  if (!chat) {
-    throw new AppError(
-      HTTP_STATUS.NOT_FOUND,
-      "Chat not found."
-    );
-  }
-
-  return chat;
-};
 
 /**
  * Service responsible for chat-related business logic.

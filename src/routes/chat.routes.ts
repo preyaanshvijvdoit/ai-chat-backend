@@ -9,6 +9,8 @@ import {
   chatIdParamSchema,
 } from "../validators/chat.validator";
 
+import messageRoutes from "./message.routes";
+
 const router = Router();
 
 /**
@@ -59,6 +61,11 @@ router.delete(
   authenticate,
   validate(chatIdParamSchema, "params"),
   chatController.deleteChat
+);
+
+router.use(
+  "/:chatId/messages",
+  messageRoutes
 );
 
 export default router;

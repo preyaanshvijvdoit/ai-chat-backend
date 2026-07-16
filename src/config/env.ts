@@ -60,9 +60,15 @@ export const env = {
   // =========================
   // AI Providers
   // =========================
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+// =========================
+// AI Providers
+// =========================
+  AI_PROVIDER: getEnvVariable("AI_PROVIDER"),
 
-  GROK_API_KEY: process.env.GROK_API_KEY || "",
+  AI_API_KEY: getEnvVariable("AI_API_KEY"),
+
+  AI_MODEL: getEnvVariable("AI_MODEL"),
+
 
   // =========================
   // Logging
