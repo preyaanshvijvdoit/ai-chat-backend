@@ -30,7 +30,11 @@ export const validate = (
       );
     }
 
-    req[property] = result.data;
+    if (property === "query") {
+      Object.assign(req.query, result.data);
+    } else {
+      req[property] = result.data;
+    }
 
     next();
   };
