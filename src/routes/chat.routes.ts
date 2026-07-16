@@ -63,8 +63,16 @@ router.delete(
   chatController.deleteChat
 );
 
+/**
+ * Message routes.
+ *
+ * Authentication and chat ID validation are applied once
+ * here for every nested message endpoint.
+ */
 router.use(
   "/:chatId/messages",
+  authenticate,
+  validate(chatIdParamSchema, "params"),
   messageRoutes
 );
 

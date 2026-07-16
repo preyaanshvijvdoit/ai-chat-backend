@@ -1,24 +1,27 @@
 import { Router } from "express";
 
 import { messageController } from "../controllers/message.controller";
-import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validation.middleware";
 import {
-  chatIdParamSchema,
-} from "../validators/chat.validator";
-import {
   sendMessageSchema,
+  getMessagesQuerySchema,
 } from "../validators/message.validator";
 
-const router = Router({ mergeParams: true });
+/**
+ * Merge parent route parameters.
+ *
+ * Without mergeParams, req.params.chatId from
+ * /chat/:chatId/messages would not be available.
+ */
+const router = Router({
+  mergeParams: true,
+});
 
 /**
  * Send a message.
  */
 router.post(
   "/",
-  authenticate,
-  validate(chatIdParamSchema, "params"),
   validate(sendMessageSchema),
   messageController.sendMessage
 );
@@ -28,8 +31,7 @@ router.post(
  */
 router.get(
   "/",
-  authenticate,
-  validate(chatIdParamSchema, "params"),
+  validate(getMessagesQuerySchema, "query"),
   messageController.getMessages
 );
 
