@@ -53,3 +53,10 @@ export interface GetChatsQueryDto {
 export interface ChatParams {
   chatId: string;
 }
+
+/**
+ * Query parameters used for searching chats.
+ */
+export interface SearchChatsDto {
+  q: string;
+}

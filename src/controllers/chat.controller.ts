@@ -97,4 +97,21 @@ export const chatController = {
       "Chat deleted successfully."
     );
   }),
+
+    /**
+     * Search chats by title.
+     */
+    searchChats: asyncHandler(async (req: Request, res: Response) => {
+    const chats = await chatService.searchChats(
+        req.user!.userId,
+        req.query.q as string
+    );
+
+    return sendSuccessResponse(
+        res,
+        HTTP_STATUS.OK,
+        "Chats fetched successfully.",
+        chats
+    );
+    }),
 };

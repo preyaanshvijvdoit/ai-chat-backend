@@ -104,4 +104,19 @@ export const chatService = {
 
     await chatRepository.softDelete(chatId);
   },
+
+    /**
+     * Searches chats belonging to the authenticated user.
+     */
+    async searchChats(
+    userId: string,
+    query: string
+    ): Promise<ChatResponseDto[]> {
+    const chats = await chatRepository.searchByTitle(
+        userId,
+        query
+    );
+
+    return chats.map(toChatResponseDto);
+    },
 };

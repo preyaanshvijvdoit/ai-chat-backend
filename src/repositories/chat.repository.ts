@@ -135,4 +135,38 @@ export const chatRepository = {
         },
     });
     },
+
+    /**
+     * Searches chats by title for the authenticated user.
+     *
+     * The search is case-insensitive and only returns
+     * active (non-deleted) chats belonging to the user.
+     */
+    searchByTitle(
+    userId: string,
+    query: string
+    ) {
+    return prisma.chat.findMany({
+        where: {
+        userId,
+        deletedAt: null,
+
+        title: {
+            contains: query,
+            mode: "insensitive",
+        },
+        },
+
+        orderBy: {
+        updatedAt: "desc",
+        },
+
+        select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        updatedAt: true,
+        },
+    });
+    },
 };

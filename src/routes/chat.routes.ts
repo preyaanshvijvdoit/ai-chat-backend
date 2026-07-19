@@ -7,6 +7,7 @@ import {
   createChatSchema,
   renameChatSchema,
   chatIdParamSchema,
+  searchChatsSchema,
 } from "../validators/chat.validator";
 
 import messageRoutes from "./message.routes";
@@ -30,6 +31,16 @@ router.get(
   "/",
   authenticate,
   chatController.getChats
+);
+
+/**
+ * Search chats by title.
+ */
+router.get(
+  "/search",
+  authenticate,
+  validate(searchChatsSchema, "query"),
+  chatController.searchChats
 );
 
 /**

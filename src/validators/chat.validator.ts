@@ -38,3 +38,14 @@ export const renameChatSchema = z.object({
 export const chatIdParamSchema = z.object({
   chatId: z.uuid("Invalid chat ID."),
 });
+
+/**
+ * Validation schema for searching chats.
+ */
+export const searchChatsSchema = z.object({
+  q: z
+    .string()
+    .trim()
+    .min(1, "Search query is required.")
+    .max(100, "Search query cannot exceed 100 characters."),
+});
