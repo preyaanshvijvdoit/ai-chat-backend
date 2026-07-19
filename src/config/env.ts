@@ -57,6 +57,8 @@ export const env = {
 
   REDIS_PORT: Number(process.env.REDIS_PORT) || 6379,
 
+  GOOGLE_CLIENT_ID: getEnvVariable("GOOGLE_CLIENT_ID"),
+
   // =========================
   // AI Providers
   // =========================

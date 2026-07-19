@@ -3,11 +3,12 @@ import { Router } from "express";
 import { authController } from "../controllers/auth.controller";
 import { validate } from "../middlewares/validation.middleware";
 import {
-  loginUserSchema,
   registerUserSchema,
+  loginUserSchema,
   verifyEmailSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  googleLoginSchema,
 } from "../validators/auth.validator";
 
 const router = Router();
@@ -28,6 +29,15 @@ router.post(
   "/login",
   validate(loginUserSchema),
   authController.login
+);
+
+/**
+ * Continue with Google.
+ */
+router.post(
+  "/google",
+  validate(googleLoginSchema),
+  authController.googleLogin
 );
 
 /**

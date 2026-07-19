@@ -36,4 +36,52 @@ export const authRepository = {
       },
     });
   },
+
+  /**
+   * Find a user by Google ID.
+   */
+  findByGoogleId(googleId: string) {
+    return prisma.user.findUnique({
+      where: {
+        googleId,
+      },
+    });
+  },
+
+  /**
+   * Create a new Google user.
+   */
+  createGoogleUser(
+    googleId: string,
+    name: string,
+    email: string
+  ) {
+    return prisma.user.create({
+      data: {
+        googleId,
+        name,
+        email,
+        provider: "GOOGLE",
+        isVerified: true,
+      },
+    });
+  },
+
+  /**
+   * Link a Google account to an existing user.
+   */
+  linkGoogleAccount(
+    userId: string,
+    googleId: string
+  ) {
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        googleId,
+        provider: "GOOGLE",
+      },
+    });
+  },
 };

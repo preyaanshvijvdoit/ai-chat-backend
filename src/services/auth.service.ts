@@ -27,6 +27,9 @@ import {
 import { passwordResetRepository } from "../repositories/password-reset.repository";
 import crypto from "crypto";
 
+import { googleService } from "./google.service";
+import { GoogleLoginDto } from "../interfaces/auth.interface";
+
 /**
  * Handles authentication business logic.
  */
@@ -132,6 +135,14 @@ export const authService = {
         HTTP_STATUS.UNAUTHORIZED,
         "Invalid email or password."
         );
+    }
+
+    // User signed up with Google.
+    if (!user.password) {
+      throw new AppError(
+        HTTP_STATUS.BAD_REQUEST,
+        "This account uses Google Sign-In. Please continue with Google."
+      );
     }
 
     // Compare the provided password with the stored hash.
@@ -254,7 +265,6 @@ export const authService = {
     async resetPassword(
       data: ResetPasswordDto
     ): Promise<void> {
-      // Find the reset token.
       const resetToken =
         await passwordResetRepository.findByToken(
           data.token
@@ -267,7 +277,6 @@ export const authService = {
         );
       }
 
-      // Check if the token has expired.
       if (resetToken.expiresAt < new Date()) {
         throw new AppError(
           HTTP_STATUS.BAD_REQUEST,
@@ -275,16 +284,73 @@ export const authService = {
         );
       }
 
-      // Hash the new password.
       const hashedPassword = await bcrypt.hash(
         data.password,
         env.BCRYPT_SALT_ROUNDS
       );
 
-      // Update password and remove token.
       await passwordResetRepository.completePasswordReset(
         resetToken.userId,
         hashedPassword
       );
+    },
+
+    /**
+     * Authenticate a user using Google.
+     */
+    async googleLogin(
+      data: GoogleLoginDto
+    ): Promise<LoginResponseDto> {
+      const googleUser =
+        await googleService.verifyIdToken(
+          data.idToken
+        );
+
+      let user = await authRepository.findByGoogleId(
+        googleUser.googleId
+      );
+
+      if (!user) {
+        user = await authRepository.findByEmail(
+          googleUser.email
+        );
+
+        if (user) {
+          user =
+            await authRepository.linkGoogleAccount(
+              user.id,
+              googleUser.googleId
+            );
+        } else {
+          user =
+            await authRepository.createGoogleUser(
+              googleUser.googleId,
+              googleUser.name,
+              googleUser.email
+            );
+        }
+      }
+
+      const payload = {
+        userId: user.id,
+        role: user.role,
+      };
+
+      const accessToken =
+        generateAccessToken(payload);
+
+      const refreshToken =
+        generateRefreshToken(payload);
+
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+        accessToken,
+        refreshToken,
+      };
     },
 };

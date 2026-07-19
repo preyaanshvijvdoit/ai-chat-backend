@@ -49,3 +49,10 @@ export interface ResetPasswordDto {
   token: string;
   password: string;
 }
+
+/**
+ * Google login request DTO.
+ */
+export interface GoogleLoginDto {
+  idToken: string;
+}

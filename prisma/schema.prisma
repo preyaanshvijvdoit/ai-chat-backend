@@ -46,7 +46,7 @@ model User {
   email String @unique
 
   // Hashed password
-  password String
+  password String?
 
   // User role
   role UserRole @default(USER)
@@ -67,6 +67,14 @@ model User {
   emailVerificationToken EmailVerificationToken?
 
   passwordResetToken PasswordResetToken?
+
+  googleId String?      @unique
+  provider AuthProvider @default(LOCAL)
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
 }
 
 // ===============================

@@ -65,3 +65,12 @@ export const resetPasswordSchema = z.object({
     .min(8, "Password must be at least 8 characters.")
     .max(100, "Password cannot exceed 100 characters."),
 });
+
+/**
+ * Google login validation schema.
+ */
+export const googleLoginSchema = z.object({
+  idToken: z
+    .string()
+    .min(1, "Google ID token is required."),
+});

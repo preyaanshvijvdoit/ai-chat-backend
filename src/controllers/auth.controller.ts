@@ -14,6 +14,8 @@ import {
   ResetPasswordDto,
 } from "../interfaces/auth.interface";
 
+import { GoogleLoginDto } from "../interfaces/auth.interface";
+
 /**
  * Authentication controller.
  */
@@ -132,6 +134,38 @@ export const authController = {
         res,
         HTTP_STATUS.OK,
         "Password reset successfully."
+    );
+    }),
+
+    /**
+     * Authenticate using Google.
+     */
+    googleLogin: asyncHandler(async (req: Request, res: Response) => {
+    const result = await authService.googleLogin(
+        req.body as GoogleLoginDto
+    );
+
+    // Store Access Token
+    res.cookie("accessToken", result.accessToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 1000,
+    });
+
+    // Store Refresh Token
+    res.cookie("refreshToken", result.refreshToken, {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return sendSuccessResponse(
+        res,
+        HTTP_STATUS.OK,
+        "Google login successful.",
+        result.user
     );
     }),
     
