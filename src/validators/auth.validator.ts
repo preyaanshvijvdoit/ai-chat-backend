@@ -43,3 +43,25 @@ export const verifyEmailSchema = z.object({
     "Verification token is required."
   ),
 });
+
+/**
+ * Forgot password validation schema.
+ */
+export const forgotPasswordSchema = z.object({
+  email: z
+    .email("Invalid email address."),
+});
+
+/**
+ * Reset password validation schema.
+ */
+export const resetPasswordSchema = z.object({
+  token: z
+    .string()
+    .min(1, "Reset token is required."),
+
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters.")
+    .max(100, "Password cannot exceed 100 characters."),
+});

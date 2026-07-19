@@ -19,6 +19,14 @@ import { generateToken } from "../utils/token";
 import { emailVerificationRepository } from "../repositories/email-verification.repository";
 import { mailService } from "./mail.service";
 
+import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from "../interfaces/auth.interface";
+
+import { passwordResetRepository } from "../repositories/password-reset.repository";
+import crypto from "crypto";
+
 /**
  * Handles authentication business logic.
  */
@@ -197,5 +205,86 @@ export const authService = {
     await emailVerificationRepository.completeEmailVerification(
         verificationToken.userId
     );
-    }
+    },
+
+    /**
+     * Sends a password reset email.
+     */
+    async forgotPassword(
+      data: ForgotPasswordDto
+    ): Promise<void> {
+      // Find user.
+      const user = await authRepository.findByEmail(
+        data.email
+      );
+
+      /**
+       * Do not reveal whether the email exists.
+       * Always return success to prevent email enumeration.
+       */
+      if (!user) {
+        return;
+      }
+
+      // Generate reset token.
+      const token = crypto.randomUUID();
+
+      // Expiry (1 hour).
+      const expiresAt = new Date(
+        Date.now() + 60 * 60 * 1000
+      );
+
+      // Save token.
+      await passwordResetRepository.createToken(
+        user.id,
+        token,
+        expiresAt
+      );
+
+      // Send reset email.
+      await mailService.sendPasswordResetEmail(
+        user.email,
+        token
+      );
+    },
+
+    /**
+     * Reset a user's password.
+     */
+    async resetPassword(
+      data: ResetPasswordDto
+    ): Promise<void> {
+      // Find the reset token.
+      const resetToken =
+        await passwordResetRepository.findByToken(
+          data.token
+        );
+
+      if (!resetToken) {
+        throw new AppError(
+          HTTP_STATUS.BAD_REQUEST,
+          "Invalid or expired reset token."
+        );
+      }
+
+      // Check if the token has expired.
+      if (resetToken.expiresAt < new Date()) {
+        throw new AppError(
+          HTTP_STATUS.BAD_REQUEST,
+          "Reset token has expired."
+        );
+      }
+
+      // Hash the new password.
+      const hashedPassword = await bcrypt.hash(
+        data.password,
+        env.BCRYPT_SALT_ROUNDS
+      );
+
+      // Update password and remove token.
+      await passwordResetRepository.completePasswordReset(
+        resetToken.userId,
+        hashedPassword
+      );
+    },
 };

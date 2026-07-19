@@ -9,6 +9,11 @@ import { sendSuccessResponse } from "../utils/api-response";
 import { env } from "../config/env";
 import { LoginUserDto } from "../interfaces/auth.interface";
 
+import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from "../interfaces/auth.interface";
+
 /**
  * Authentication controller.
  */
@@ -97,6 +102,36 @@ export const authController = {
         res,
         HTTP_STATUS.OK,
         "Email verified successfully."
+    );
+    }),
+
+    /**
+     * Send password reset email.
+     */
+    forgotPassword: asyncHandler(async (req: Request, res: Response) => {
+    await authService.forgotPassword(
+        req.body as ForgotPasswordDto
+    );
+
+    return sendSuccessResponse(
+        res,
+        HTTP_STATUS.OK,
+        "If an account exists, a password reset email has been sent."
+    );
+    }),
+
+    /**
+     * Reset password.
+     */
+    resetPassword: asyncHandler(async (req: Request, res: Response) => {
+    await authService.resetPassword(
+        req.body as ResetPasswordDto
+    );
+
+    return sendSuccessResponse(
+        res,
+        HTTP_STATUS.OK,
+        "Password reset successfully."
     );
     }),
     

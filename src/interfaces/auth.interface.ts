@@ -34,3 +34,18 @@ export interface LoginResponseDto {
   accessToken: string;
   refreshToken: string;
 }
+
+/**
+ * Forgot password request DTO.
+ */
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+/**
+ * Reset password request DTO.
+ */
+export interface ResetPasswordDto {
+  token: string;
+  password: string;
+}
