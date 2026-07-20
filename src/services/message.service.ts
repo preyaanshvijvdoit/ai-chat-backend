@@ -154,6 +154,111 @@ export const messageService = {
   },
 
   /**
+   * Streams a message to the AI.
+   */
+    async streamMessage(
+    chatId: string,
+    userId: string,
+    data: SendMessageDto,
+    onToken: (token: string) => void,
+    file?: Express.Multer.File
+    ): Promise<void> {
+    /**
+     * Ensure the authenticated user owns the chat.
+     */
+    await getAuthorizedChat(chatId, userId);
+
+    /**
+     * Require either a message or a file.
+     */
+    if (!data.content && !file) {
+        throw new AppError(
+        HTTP_STATUS.BAD_REQUEST,
+        "Either a message or a file is required."
+        );
+    }
+
+    /**
+     * Extract uploaded file text.
+     */
+    let extractedText = "";
+
+    if (file) {
+    extractedText =
+        await fileService.extractText(
+        file.path,
+        file.mimetype
+        );
+
+    await fileService.deleteFile(
+        file.path
+    );
+    }
+
+    /**
+     * Build the final prompt.
+     */
+    const finalPrompt = [
+    data.content,
+    extractedText &&
+        `\n\nAttached Document:\n${extractedText}`,
+    ]
+    .filter(Boolean)
+    .join("");
+
+    /**
+     * Save the user's message.
+     */
+    await messageRepository.create(
+    chatId,
+    MessageRole.USER,
+    finalPrompt
+    );
+
+    /**
+     * Load the complete conversation history.
+     */
+    const messages =
+      await messageRepository.findByChatId(chatId);
+
+    /**
+     * Build AI context.
+     */
+    const context =
+      contextService.buildContext(messages);
+
+    /**
+     * Generate an AI response.
+     */
+    const aiResponse =
+    await aiService.streamResponse(
+        context,
+        onToken
+    );
+
+    /**
+     * Save the assistant message and update the
+     * chat timestamp atomically.
+     */
+    const assistantMessage =
+    await prisma.$transaction(async (tx) => {
+
+    await messageRepository.create(
+        chatId,
+        MessageRole.ASSISTANT,
+        aiResponse.content,
+        tx
+    );
+
+    await chatRepository.touch(
+        chatId,
+        tx
+    );
+    });
+
+  },
+
+  /**
    * Returns every message belonging to a chat.
    */
   async getMessages(

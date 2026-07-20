@@ -20,6 +20,16 @@ const router = Router({
 });
 
 /**
+ * Stream an AI response.
+ */
+router.post(
+  "/stream",
+  upload.single("file"),
+  validate(sendMessageSchema),
+  messageController.streamMessage
+);
+
+/**
  * Send a message.
  */
 router.post(
@@ -37,5 +47,6 @@ router.get(
   validate(getMessagesQuerySchema, "query"),
   messageController.getMessages
 );
+
 
 export default router;

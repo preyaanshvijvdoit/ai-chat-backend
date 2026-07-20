@@ -45,4 +45,51 @@ export const messageController = {
       messages
     );
   }),
+
+    /**
+     * Streams an AI response.
+     */
+    streamMessage: asyncHandler(
+    async (req: Request, res: Response) => {
+
+        res.setHeader(
+        "Content-Type",
+        "text/event-stream"
+        );
+
+        res.setHeader(
+        "Cache-Control",
+        "no-cache"
+        );
+
+        res.setHeader(
+        "Connection",
+        "keep-alive"
+        );
+
+        res.flushHeaders();
+
+        await messageService.streamMessage(
+        req.params.chatId as string,
+        req.user!.userId,
+        req.body as SendMessageDto,
+        (token) => {
+            res.write(
+            `data: ${JSON.stringify({
+                token,
+            })}\n\n`
+            );
+        },
+        req.file
+        );
+
+        res.write(
+        `data: ${JSON.stringify({
+            done: true,
+        })}\n\n`
+        );
+
+        res.end();
+    }
+    ),
 };

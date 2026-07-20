@@ -52,7 +52,44 @@ export class GroqProvider implements AiProvider {
         response.choices[0]?.finish_reason ?? undefined,
         
     };
-
-    
   }
+
+    /**
+     * Streams an AI response.
+     */
+    async streamResponse(
+    messages: AiMessage[],
+    onToken: (token: string) => void
+    ): Promise<AiResponse> {
+
+    const stream =
+        await this.client.chat.completions.create({
+        model: env.AI_MODEL,
+        messages,
+        stream: true,
+        });
+
+    let fullResponse = "";
+
+    for await (const chunk of stream) {
+
+        const token =
+        chunk.choices[0]?.delta?.content ?? "";
+
+        if (!token) {
+        continue;
+        }
+
+        fullResponse += token;
+
+        onToken(token);
+    }
+
+    return {
+        content: fullResponse,
+        inputTokens: undefined,
+        outputTokens: undefined,
+        finishReason: "stop",
+    };
+    }
 }

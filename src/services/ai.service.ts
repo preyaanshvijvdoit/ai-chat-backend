@@ -40,4 +40,17 @@ export const aiService = {
   ): Promise<AiResponse> {
     return provider.generateResponse(messages);
   },
+
+    /**
+     * Streams an AI response.
+     */
+    async streamResponse(
+    messages: AiMessage[],
+    onToken: (token: string) => void
+    ): Promise<AiResponse> {
+    return provider.streamResponse(
+        messages,
+        onToken
+    );
+    },
 };

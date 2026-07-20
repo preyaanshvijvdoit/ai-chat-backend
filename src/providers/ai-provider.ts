@@ -52,10 +52,12 @@ export interface AiResponse {
  * must implement this interface.
  */
 export interface AiProvider {
-  /**
-   * Generates an AI response.
-   */
   generateResponse(
     messages: AiMessage[]
+  ): Promise<AiResponse>;
+
+  streamResponse(
+    messages: AiMessage[],
+    onToken: (token: string) => void
   ): Promise<AiResponse>;
 }
