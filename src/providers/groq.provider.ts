@@ -26,6 +26,12 @@ export class GroqProvider implements AiProvider {
   async generateResponse(
     messages: AiMessage[]
   ): Promise<AiResponse> {
+
+    console.log("Messages being sent:", messages);
+    console.log(
+    "Total characters:",
+    JSON.stringify(messages).length
+    );
     const response =
       await this.client.chat.completions.create({
         model: env.AI_MODEL,
@@ -44,6 +50,9 @@ export class GroqProvider implements AiProvider {
 
       finishReason:
         response.choices[0]?.finish_reason ?? undefined,
+        
     };
+
+    
   }
 }
