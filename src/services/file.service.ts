@@ -39,15 +39,22 @@ export const fileService = {
   /**
    * Extract text from a PDF.
    */
-  async extractPdf(
+    async extractPdf(
     filePath: string
-  ): Promise<string> {
-    const buffer = await fs.readFile(filePath);
+    ): Promise<string> {
+    try {
+        const buffer = await fs.readFile(filePath);
 
-    const pdf = await pdfParse(buffer);
+        const pdf = await pdfParse(buffer);
 
-    return pdf.text;
-  },
+        return pdf.text;
+    } catch {
+        throw new AppError(
+        HTTP_STATUS.BAD_REQUEST,
+        "Unable to read the uploaded PDF. Please upload a valid PDF document."
+        );
+    }
+    },
 
   /**
    * Extract text from a TXT file.
