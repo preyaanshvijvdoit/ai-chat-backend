@@ -10,23 +10,24 @@ import { sendSuccessResponse } from "../utils/api-response";
  * Message controller.
  */
 export const messageController = {
-  /**
-   * Send a new message.
-   */
-  sendMessage: asyncHandler(async (req: Request, res: Response) => {
+    /**
+     * Send a new message.
+     */
+    sendMessage: asyncHandler(async (req: Request, res: Response) => {
     const message = await messageService.sendMessage(
-      req.params.chatId as string,
-      req.user!.userId,
-      req.body as SendMessageDto
+        req.params.chatId as string,
+        req.user!.userId,
+        req.body as SendMessageDto,
+        req.file
     );
 
     return sendSuccessResponse(
-      res,
-      HTTP_STATUS.CREATED,
-      "Message sent successfully.",
-      message
+        res,
+        HTTP_STATUS.CREATED,
+        "Message sent successfully.",
+        message
     );
-  }),
+    }),
 
   /**
    * Fetch all messages for a chat.

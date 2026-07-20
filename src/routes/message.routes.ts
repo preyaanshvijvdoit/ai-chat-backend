@@ -7,6 +7,8 @@ import {
   getMessagesQuerySchema,
 } from "../validators/message.validator";
 
+import { upload } from "../middlewares/upload.middleware";
+
 /**
  * Merge parent route parameters.
  *
@@ -22,6 +24,7 @@ const router = Router({
  */
 router.post(
   "/",
+  upload.single("file"),
   validate(sendMessageSchema),
   messageController.sendMessage
 );

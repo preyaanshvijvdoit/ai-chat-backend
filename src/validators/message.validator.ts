@@ -7,8 +7,8 @@ export const sendMessageSchema = z.object({
   content: z
     .string()
     .trim()
-    .min(1, "Message cannot be empty.")
-    .max(10000, "Message cannot exceed 10000 characters."),
+    .max(10000, "Message cannot exceed 10000 characters.")
+    .optional(),
 });
 
 /**

@@ -14,6 +14,11 @@ import {
   SendMessageResponseDto,
 } from "../interfaces/message.interface";
 
+import { fileService } from "./file.service";
+
+import { AppError } from "../utils/app-error";
+import { HTTP_STATUS } from "../constants/http-status";
+
 /**
  * Converts a database Message object into
  * the DTO returned to the client.
@@ -43,7 +48,8 @@ export const messageService = {
   async sendMessage(
     chatId: string,
     userId: string,
-    data: SendMessageDto
+    data: SendMessageDto,
+    file?: Express.Multer.File
   ): Promise<SendMessageResponseDto> {
     /**
      * Ensure the authenticated user owns the chat.
@@ -51,12 +57,50 @@ export const messageService = {
     await getAuthorizedChat(chatId, userId);
 
     /**
+     * Require either a message or a file.
+     */
+    if (!data.content && !file) {
+        throw new AppError(
+        HTTP_STATUS.BAD_REQUEST,
+        "Either a message or a file is required."
+        );
+    }
+
+    /**
+     * Extract uploaded file text.
+     */
+    let extractedText = "";
+
+    if (file) {
+    extractedText =
+        await fileService.extractText(
+        file.path,
+        file.mimetype
+        );
+
+    await fileService.deleteFile(
+        file.path
+    );
+    }
+
+    /**
+     * Build the final prompt.
+     */
+    const finalPrompt = [
+    data.content,
+    extractedText &&
+        `\n\nAttached Document:\n${extractedText}`,
+    ]
+    .filter(Boolean)
+    .join("");
+
+    /**
      * Save the user's message.
      */
     const userMessage = await messageRepository.create(
       chatId,
       MessageRole.USER,
-      data.content
+      finalPrompt
     );
 
     /**

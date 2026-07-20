@@ -2,7 +2,7 @@
  * Data required when a user sends a message.
  */
 export interface SendMessageDto {
-  content: string;
+  content?: string;
 }
 
 /**
